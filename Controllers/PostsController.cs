@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PikabuApi.Models;
+using PikabuApi.Parsers;
 
 namespace PikabuApi.Controllers
 {
@@ -11,25 +14,50 @@ namespace PikabuApi.Controllers
     public class PostsController : Controller
     {
         PikabuDbContext _db;
+
         public PostsController(PikabuDbContext dbContext)
         {
             _db = dbContext;
+            
         }
 
         // /api/posts/id/1234567
         [HttpGet("id/{postId}")]
-        public Post GetSinglePost(int postId)
+        public async Task<Post> GetSinglePost(int postId)
         {
-            return null;
+            PostsParser parser = new PostsParser();
+            var result = new List<Post>();
+            using (var httpClient = new HttpClient())
+            {
+                var request = await httpClient.GetAsync("https://www.pikabu.ru/story/_" + postId);
+                if (request.IsSuccessStatusCode)
+                {
+                    var str = await request.Content.ReadAsStringAsync();
+                    result = await parser.ParseAsync(str);
+                }
+            }
+            return result[0];
         }
 
         // /api/posts/hot?p=1&c=2
         // p - page number
         // c - page count
         [HttpGet("hot")]
-        public List<Post> GetHotPosts()
+        public async Task<List<Post>> GetHotPosts()
         {
-            return null;
+            PostsParser parser = new PostsParser();
+            var result = new List<Post>();
+            using (var httpClient = new HttpClient())
+            {
+                var request = await httpClient.GetAsync("https://www.pikabu.ru/hot?page=1");
+                if(request.IsSuccessStatusCode)
+                {
+                    var str = await request.Content.ReadAsStringAsync();
+                    result = await parser.ParseAsync(str);
+                }
+                
+            }
+            return result;
         }
 
         // /api/posts/best?p=1&c=2
