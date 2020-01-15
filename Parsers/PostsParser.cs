@@ -14,7 +14,7 @@ namespace PikabuApi.Parsers
         public async Task<List<Post>> ParseAsync(string htmlSource)
         {
             var htmlParser = new HtmlParser();
-            var htmlDocument = await (htmlParser).ParseDocumentAsync(htmlSource);
+            var htmlDocument = await htmlParser.ParseDocumentAsync(htmlSource);
             var htmlPostNodes = htmlDocument.QuerySelectorAll("article");
 
             List<Post> result = new List<Post>();
@@ -22,9 +22,6 @@ namespace PikabuApi.Parsers
             {
                 try
                 {
-                    if(IsAdvertPost(postNode))
-                        continue;
-
                     int post_id = 0;
                     int post_rating = 0;
                     bool post_has_rating = false;
@@ -101,11 +98,6 @@ namespace PikabuApi.Parsers
             }
 
             return result;
-        }
-
-        private bool IsAdvertPost(IElement postNode)
-        {
-            return false;
         }
     }
 }

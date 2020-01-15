@@ -17,7 +17,6 @@ namespace PikabuApi.Controllers
         public PostsController(PikabuDbContext dbContext)
         {
             _db = dbContext;
-            
         }
 
         // /api/posts/id/1234567
